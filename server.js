@@ -2,8 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const router = require('./routes/auth')
 const cors = require('cors')
 const User = require('./models/userModel')
 const JobsList = require('./models/jobsModel')
@@ -14,6 +13,7 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}))
+app.use(router)
 
 app.get('/',(req,res)=>{
     res.send("hey ya!")
@@ -27,68 +27,19 @@ app.get('/health',(req,res)=>{
     })
 })
 
-app.post('/register', async (req,res)=>{
+app.get('/users', async (req,res)=>{
     try{
-        const { name, email, mobile, password } = req.body;
-        if(!name || !email || !mobile || !password){
-            return res.status(400).json({
-                error: "please provide all the required fields"
-            })
-        }
-
-        const user = await User.findOne({ email });
-        if(user){
-            return res.status(409).json({
-                error: "User already exists"
-            })
-        }
-        const ePass = await bcrypt.hash(password, 10);
-        await User.create({ name, email, mobile, password: ePass })
-        res.status(201).json({
-            message: "User registered successfully"
-        });
-    }
-    catch(error){
-        res.status(500).json({
-            error: error.message
-        });
-    }
-});
-
-app.post('/login', async (req,res)=>{
-    try{
-        const { email, password } = req.body;
-        if(!email || !password){
-            return res.status(400).json({
-                error: "please provide the details"
-            })
-        }
-        const user = await User.findOne({ email });
-        if(!user){
-            return res.status(401).json({
-                error: "User not found"
-            })
-        }
-        const passCompare = await bcrypt.compare(password, user.password)
-        if(!passCompare){
-            return res.status(401).json({
-                error: "Invalid password"
-            })
-        }
-        const token = jwt.sign(
-            {email: user.email},
-            process.env.JWT_SECRETKEY,
-            { expiresIn: '1h' }
-        );
-        res.status(200).json({
-            message: "login Success",
-            token,
+        let users = await User.find({})
+        res.json({
+            Message: 'users',
+            data: users,
         })
-    }
-    catch(error){
-        res.status(500).json({
-            error: "Failed to login"
-        });
+    }catch(error){
+        console.log(error)
+        res.json({
+            status: 'fail',
+            message: 'something went wrong',
+        })
     }
 })
 
@@ -97,7 +48,6 @@ app.use((req, res, next) => {
     error.status = 404;
     next(error);
   });
-
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({
@@ -115,3 +65,70 @@ app.listen(PORT,()=>{
         console.log(error)
     })
 })
+
+
+
+// app.post('/register', async (req,res)=>{
+//     try{
+//         const { name, email, mobile, password } = req.body;
+//         if(!name || !email || !mobile || !password){
+//             return res.status(400).json({
+//                 error: "please provide all the required fields"
+//             })
+//         }
+
+//         const user = await User.findOne({ email });
+//         if(user){
+//             return res.status(409).json({
+//                 error: "User already exists"
+//             })
+//         }
+//         const ePass = await bcrypt.hash(password, 10);
+//         await User.create({ name, email, mobile, password: ePass })
+//         res.status(201).json({
+//             message: "User registered successfully"
+//         });
+//     }
+//     catch(error){
+//         res.status(500).json({
+//             error: error.message
+//         });
+//     }
+// });
+
+// app.post('/login', async (req,res)=>{
+//     try{
+//         const { email, password } = req.body;
+//         if(!email || !password){
+//             return res.status(400).json({
+//                 error: "please provide the details"
+//             })
+//         }
+//         const user = await User.findOne({ email });
+//         if(!user){
+//             return res.status(401).json({
+//                 error: "User not found"
+//             })
+//         }
+//         const passCompare = await bcrypt.compare(password, user.password)
+//         if(!passCompare){
+//             return res.status(401).json({
+//                 error: "Invalid password"
+//             })
+//         }
+//         const token = jwt.sign(
+//             {email: user.email},
+//             process.env.JWT_SECRETKEY,
+//             { expiresIn: '1h' }
+//         );
+//         res.status(200).json({
+//             message: "login Success",
+//             token,
+//         })
+//     }
+//     catch(error){
+//         res.status(500).json({
+//             error: "Failed to login"
+//         });
+//     }
+// })

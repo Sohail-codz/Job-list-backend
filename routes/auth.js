@@ -3,13 +3,9 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
+const errorHandler = require('../middlewares/errorHandler')
+require('dotenv').config();
 
-const errorHandler = (res,error)=>{
-    console.error(error);
-    res.status(500).json({
-        error: error.message
-    });
-}
 
 router.post('/register', async (req, res) => {
     try {

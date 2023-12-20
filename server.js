@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const router = require('./routes/auth')
+const authRouter = require('./routes/auth')
+const jobRouter = require('./routes/job')
 const cors = require('cors')
 const User = require('./models/userModel')
 const JobsList = require('./models/jobsModel')
@@ -13,7 +14,9 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}))
-app.use(router)
+
+app.use('/', authRouter);
+app.use('/', jobRouter);
 
 app.get('/',(req,res)=>{
     res.send("hey ya!")
@@ -42,7 +45,23 @@ app.get('/users', async (req,res)=>{
         })
     }
 })
+app.get('/jobs', async (req,res)=>{
+    try{
+        let jobs = await JobsList.find({})
+        res.json({
+            Message: 'Jobs',
+            data: jobs,
+        })
+    }catch(error){
+        console.log(error)
+        res.json({
+            status: 'fail',
+            message: 'something went wrong',
+        })
+    }
+})
 
+//error-handler 
 app.use((req, res, next) => {
     const error = new Error("Not found");
     error.status = 404;
@@ -67,6 +86,7 @@ app.listen(PORT,()=>{
 })
 
 
+// ROUTES IF USED HERE ONLY
 
 // app.post('/register', async (req,res)=>{
 //     try{

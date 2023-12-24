@@ -45,4 +45,28 @@ router.post('/job-posts', authHandler, async (req,res)=>{
     }
 })
 
+router.put('/job-posts/:id', authHandler, async (req,res)=>{
+    const jobId = req.params.id;
+    const {companyName,jobPosition,remoteNoffice} = req.body;
+    
+    try{
+        const updatedJob = await JobsList.findByIdAndUpdate(jobId,
+            {
+                companyName,
+                jobPosition,
+                remoteNoffice,
+            },{new: true});
+        if(!updatedJob){
+            return res.status(404).json({message: 'Job not found'});
+        }
+        res.status(200).json({
+            message: 'Job updated successfully',
+            updatedJob,
+        })
+    }
+    catch(error){
+        errorHandler(res,error);
+    }
+})
+
 module.exports = router;

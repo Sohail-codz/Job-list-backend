@@ -25,7 +25,8 @@ router.post('/register', async (req, res) => {
         const ePass = await bcrypt.hash(password, 10);
         await User.create({ name, email, mobile, password: ePass });
         res.status(201).json({
-            message: "User registered successfully"
+            message: "User registered successfully",
+            recruiterName: req.body.name,
         });
     } catch (error) {
         errorHandler(res,error);
@@ -59,6 +60,7 @@ router.post('/login', async (req, res) => {
         );
         res.status(200).json({
             message: "login Success",
+            recruiterName: user.name,
             token,
         });
     } catch (error) {

@@ -69,4 +69,25 @@ router.put('/job-posts/:id', authHandler, async (req,res)=>{
     }
 })
 
+router.get('/job-lists', async (req,res)=>{
+    const {jobType,skillsRequired} = req.query;
+    try{
+        const filter = {}
+        if(jobType){
+            filter.jobType = jobType;
+        }
+        if(skillsRequired && typeof skillsRequired === 'string'){
+            filter.skillsRequired = { $in: skillsRequired.split('&')};
+        }
+        console.log(filter);
+        const jobPosts = await JobsList.find(filter);
+        res.status(200).json({
+            message: 'Jobs with filter',
+            jobPosts,
+        })
+    }catch(error){
+        errorHandler(res,error);
+    }
+})
+
 module.exports = router;

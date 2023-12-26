@@ -90,4 +90,22 @@ router.get('/job-lists', async (req,res)=>{
     }
 })
 
+router.get('/job-posts/:id', async (req,res)=>{
+    const jobId = req.params.id;
+    try{
+        const jobPost = await JobsList.findById(jobId);
+        if(!jobPost){
+            res.status(404).json({
+                message:'job post not found',
+            })
+        }
+        res.status(200).json({
+            message:'job found',
+            jobPost,
+        })
+    }catch(error){
+        errorHandler(res,error);
+    }
+})
+
 module.exports = router;

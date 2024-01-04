@@ -24,9 +24,15 @@ router.post('/register', async (req, res) => {
         }
         const ePass = await bcrypt.hash(password, 10);
         await User.create({ name, email, mobile, password: ePass });
+        const token = jwt.sign(
+            {email},
+            process.env.JWT_SECRETKEY,
+            {expiresIn:  '1h'}
+        )
         res.status(201).json({
             message: "User registered successfully",
             recruiterName: req.body.name,
+            token,
         });
     } catch (error) {
         errorHandler(res,error);
